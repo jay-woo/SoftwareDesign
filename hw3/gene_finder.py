@@ -90,37 +90,35 @@ def rest_of_ORF(dna):
         dna: a DNA sequence
         returns: the open reading frame represented as a string
     """
-
-    ORF = dna
-    end_ORF = -1 #
-
-    looking_for_end = False
     
-    """Finds where the start and end codons are"""
-    for i in range(len(dna) / 3):
-        current_codon = dna[i*3 : i*3+3]
+    start_ORF = 0
+    
+    """Finds the start codon"""
+    for i in range(len(dna) - 3):
+        current_codon = dna[i:i+3]
         if current_codon == 'ATG':
             start_ORF = i
-            looking_for_end = True
-        elif looking_for_end and (current_codon == 'TAG' or current_codon == 'TAA' or current_codon == 'TGA'):
-            end_ORF = i
-            break;
-                        
-    """Checks if there is an end_ORF"""
-    if not end_ORF == -1:
-        ORF = dna[start_ORF*3:end_ORF*3] #Ends right before end codon
+            break
+    
+    """Finds the end codon (if one exists)"""
+    search_range = (len(dna) - start_ORF)/3
+    for j in range(search_range): #Divides the ORF into sets of 3
+        current_codon = dna[start_ORF + j*3 : start_ORF + j*3 + 3]
+        if current_codon == 'TAG' or current_codon == 'TAA' or current_codon == 'TGA':
+            end_ORF = start_ORF + j*3
+            dna = dna[start_ORF:end_ORF]
+            break
         
-    """Returns whole string if there is no end_ORF"""
-    return ORF
+    return dna
 
 def rest_of_ORF_unit_tests():
     """ Unit tests for the rest_of_ORF function """
     
     dna1 = "ACTATGACGGCTTGA"
-    dna2 = "CGTAGTATGACT"
+    dna2 = "CGTAGTATGAC"
         
     print "input: " + dna1 + ", expected output: ATGACGGCT, actual output: " + rest_of_ORF(dna1)
-    print "input: " + dna2 + ", expected output: CGTAGTATGACT, actual output: " + rest_of_ORF(dna2)        
+    print "input: " + dna2 + ", expected output: CGTAGTATGAC, actual output: " + rest_of_ORF(dna2)        
         
 def find_all_ORFs_oneframe(dna):
     """ Finds all non-nested open reading frames in the given DNA sequence and returns
@@ -269,10 +267,10 @@ def longest_ORF_noncoding(dna, num_trials):
     for i in range(num_trials):
         rand_dna = list(dna) #Converts dna string into a list
         shuffle(rand_dna) #Shuffles the dna list
-        collapse(rand_dna) #Converts the dna back into a string
-        
+        rand_dna = collapse(rand_dna) #Converts the dna back into a string
+
         rand_longest_ORF = longest_ORF(rand_dna)
-        
+                
         if len(rand_longest_ORF) > longest_strand:
             longest_strand = len(rand_longest_ORF)
             
@@ -299,12 +297,9 @@ def gene_finder(dna, threshold):
             
     return thresh_ORFs
    
-get_reverse_complement_unit_tests()
-   
-"""
-dna = load_seq("./data/X73525.fa")
-threshold = longest_ORF_noncoding(dna, 1500)
-print threshold
-candidate_genes = gene_finder(dna, threshold)
-print candidate_genes
-"""
+def main():   
+    dna = load_seq("./data/X73525.fa")
+    threshold = longest_ORF_noncoding(dna, 1500)
+    candidate_genes = gene_finder(dna, threshold)
+    
+main()
