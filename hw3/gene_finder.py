@@ -94,8 +94,8 @@ def rest_of_ORF(dna):
     start_ORF = 0
     
     """Finds the start codon"""
-    for i in range(len(dna) - 3):
-        current_codon = dna[i:i+3]
+    for i in range(len(dna) - 3):   #I didn't realize that the input is assumed to begin with a start codon,
+        current_codon = dna[i:i+3]  #so this part is pretty much unnecessary...
         if current_codon == 'ATG':
             start_ORF = i
             break
