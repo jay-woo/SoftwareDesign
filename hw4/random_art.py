@@ -27,24 +27,17 @@ def build_random_function(min_depth, max_depth):
     if max_depth > min_depth:
         random_depth = randint(min_depth, max_depth)
         return build_random_function(random_depth, random_depth)
-    elif min_depth >= 1:
+    elif max_depth == min_depth:
         """Selects a function to nest into the equation"""
-        if min_depth > 2:
-            random_function = functions[randint(0,4)] #Selects a random function
-        elif min_depth > 1:
-            random_function = functions_a[randint(0,2)] #Selects a function w/ one parameter, if the current depth is too small
+        if min_depth > 1: #Selects a random function
+            random_function = functions[randint(0,4)]
+            if random_function in functions_a:
+                return [random_function, build_random_function(min_depth-1, max_depth-1)]
+            elif random_function in functions_ab:
+                return [random_function, build_random_function(min_depth-1, max_depth-1), build_random_function(min_depth-1, max_depth-1)]
         elif min_depth == 1: #Base case
             random_function = parameters[randint(0,1)]
             return [random_function]
-        
-        """Figures out how to nest the functions together depending on how many parameters there are"""
-        if random_function in functions_a: #One parameter
-            return [random_function, build_random_function(min_depth-1, max_depth-1)]
-        elif random_function in functions_ab: #Two parameters
-            n = randint(1, min_depth-2)   #Randomly distributes the depth
-            m = min_depth - n - 1         #between the two nested functions
-            return [random_function, build_random_function(n, n), build_random_function(m, m)]
-
 
 def evaluate_random_function(f, x, y):
     """ Evaluates the function f using the given values x and y
