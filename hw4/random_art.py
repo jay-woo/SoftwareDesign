@@ -23,22 +23,19 @@ def build_random_function(min_depth, max_depth):
                 ex. ['sin_pi', ['prod', ['x'], ['y']]]
     """
     
-    """Recursively generates a function"""
-    if max_depth > min_depth:
+    if max_depth > min_depth: #Selects a random depth
         random_depth = randint(min_depth, max_depth)
         return build_random_function(random_depth, random_depth)
-    elif max_depth == min_depth:
-        """Selects a function to nest into the equation"""
-        if min_depth > 1: #Selects a random function
+    else: #Creates a random function with the selected random depth
+        if min_depth == 1: #Base case
+            return list(parameters[randint(0,1)])
+        else:
             random_function = functions[randint(0,4)]
-            if random_function in functions_a:
+            if random_function in functions_a: #If there is one parameter
                 return [random_function, build_random_function(min_depth-1, max_depth-1)]
-            elif random_function in functions_ab:
+            elif random_function in functions_ab: #If there are two parameters
                 return [random_function, build_random_function(min_depth-1, max_depth-1), build_random_function(min_depth-1, max_depth-1)]
-        elif min_depth == 1: #Base case
-            random_function = parameters[randint(0,1)]
-            return [random_function]
-
+                
 def evaluate_random_function(f, x, y):
     """ Evaluates the function f using the given values x and y
     
@@ -48,45 +45,24 @@ def evaluate_random_function(f, x, y):
             The result of plugging in x and y into the function
     """
 
-    func1 = f[0]
-    func2 = f[1]
-    
-    """Calculates the first inner function"""
-    if func2[0] in parameters:
-        if func2[0] == "x":
-            res = x
-        elif func2[0] == "y":
-            res = y
-    else:
-        res = evaluate_random_function(func2, x, y)
         
-    """Calculates the second inner function (if one exists)"""
-    if func1 in functions_ab:
-        func3 = f[2]
-        if func3[0] in parameters:
-            if func3[0] == "x":
-                res2 = x
-            elif func3[0] == "y":
-                res2 = y
+    if f[0] in parameters: #Base case
+        if f[0] == "x":
+            return x
         else:
-            res2 = evaluate_random_function(func3, x, y)
-
-    if func1 in functions_a:
-        """Calculates the outer function (one parameter)"""
-        if func1 == "sin_pi":
-            return sin(pi*res)
-        elif func1 == "cos_pi":
-            return cos(pi*res)
-        elif func1 =="square":
-            return res**2
-    
-    elif func1 in functions_ab:
-        """Calculates the outer function (two parameters)"""
-        if func1 == "prod":
-            return res * res2
-        elif func1 == "avg":
-            return (res + res2) / 2
-    
+            return y
+    else: #Evaluates all of the functions
+        if f[0] == "sin_pi":
+            return sin(pi*evaluate_random_function(f[1], x, y))
+        elif f[0] == "cos_pi":
+            return cos(pi*evaluate_random_function(f[1], x, y))
+        elif f[0] == "square":
+            return (evaluate_random_function(f[1], x, y))**2
+        elif f[0] == "prod":
+            return (evaluate_random_function(f[1], x, y)) * (evaluate_random_function(f[2], x, y))
+        elif f[0] == "avg":
+            return ((evaluate_random_function(f[1], x, y)) + (evaluate_random_function(f[2], x, y))) / 2
+   
 def remap_interval(val, input_interval_start, input_interval_end, output_interval_start, output_interval_end):
     """ Maps the input value that is in the interval [input_interval_start, input_interval_end]
         to the output interval [output_interval_start, output_interval_end].  The mapping
